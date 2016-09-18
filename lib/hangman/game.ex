@@ -168,7 +168,7 @@ Here's this module being exercised from an iex session:
     |> String.trim
     |> String.downcase
 
-    state= %State{word: word, letters_remain: Enum.to_list(String.codepoints(word) )} 
+    state= %State{word: word, letters_remain: Enum.to_list(String.codepoints(word) )}
   end
 
 
@@ -245,6 +245,7 @@ Here's this module being exercised from an iex session:
 
   @spec word_as_string(state, boolean) :: binary
   def word_as_string(state, reveal \\ false) do
+    guessed_word_so_far(state, reveal)
   end
 
   ###########################
@@ -266,5 +267,26 @@ Here's this module being exercised from an iex session:
     else
       {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), turns: state.turns-1}, :bad_guess}
     end
+  end
+
+
+  defp guessed_word_so_far(state, true) do
+    String.replace(state.word,~r{(.)},"\\g{1} ")
+  end
+  defp guessed_word_so_far(state, false) do
+    if(state.letters_guessed == []) do
+      String.replace(state.word,~r{(.)},"_ ")
+    else
+      remain = List.to_string(state.letters_remain)
+      remainingword(state, String.equivalent?(state.word, remain) )
+    end
+  end
+
+  defp remainingword(state, true) do
+    String.replace(state.word,~r{(.)},"_ ")
+  end
+  defp reminaingword(state, false) do
+    String.replace(state.word,state.letters_remain,"_")
+    |>String.replace(~r{(.)},"\\g{1} ")
   end
  end
