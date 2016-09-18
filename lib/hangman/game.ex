@@ -226,6 +226,7 @@ Here's this module being exercised from an iex session:
 
   @spec turns_left(state) :: integer
   def turns_left(state) do
+    state.turns
   end
 
   @doc """
@@ -246,9 +247,12 @@ Here's this module being exercised from an iex session:
   ###########################
 
   # Your private functions go here
-  defp handle_answer(state, true, guess) do
-  end
   defp handle_answer(state,true, guess) do
-    {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), letters_remain: List.delete(state.letters_remain,guess), turns: state.turns-1}, :good_guess}
+    letters_remain = List.delete(state.letters_remain,guess)
+    if(letters_remain == []) do
+      {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), letters_remain: letters_remain}, :won, nil}
+    else
+      {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), letters_remain: letters_remain, turns: state.turns-1}, :good_guess}
+    end
   end
  end
