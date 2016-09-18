@@ -164,6 +164,11 @@ Here's this module being exercised from an iex session:
   """
   @spec new_game(binary) :: state
   def new_game(word) do
+    word
+    |> String.trim
+    |> String.downcase
+
+    state= %State{word: word, letters_remain: Enum.to_list(String.codepoints(word) )} 
   end
 
 
@@ -189,7 +194,7 @@ Here's this module being exercised from an iex session:
 
   @spec make_move(state, ch) :: { state, atom, optional_ch }
   def make_move(state, guess) do
-    handle_answer(state, Enum.member?(String.codepoints(state.word)), guess )
+    handle_answer(state, Enum.member?(String.codepoints(state.word),guess), guess )
   end
 
 
