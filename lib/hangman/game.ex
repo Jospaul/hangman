@@ -107,7 +107,7 @@ Here's this module being exercised from an iex session:
 
     iex(13)> { game, state, guess } = G.make_move(game, "b")
     . . .
-    iex(14)> state                                          
+    iex(14)> state
     :bad_guess
 
     iex(15)> { game, state, guess } = G.make_move(game, "f")
@@ -134,6 +134,14 @@ Here's this module being exercised from an iex session:
   @type state :: map
   @type ch    :: binary
   @type optional_ch :: ch | nil
+  defmodule State do
+    defstruct(
+      word: "",
+      letters_remain: [],
+      turns: 10,
+      letters_guessed: []
+      )
+  end
 
   @doc """
   Run a game of Hangman with our user. Use the dictionary to
@@ -142,6 +150,10 @@ Here's this module being exercised from an iex session:
 
   @spec new_game :: state
   def new_game do
+    word = Hangman.Dictionary.random_word()
+           |> String.trim
+           |> String.downcase
+    state=%State{word: word, letters_remain: Enum.to_list(String.codepoints(word) )}
   end
 
 
@@ -177,6 +189,7 @@ Here's this module being exercised from an iex session:
 
   @spec make_move(state, ch) :: { state, atom, optional_ch }
   def make_move(state, guess) do
+    handle_answer(state, Enum.member?(String.codepoints(state.word)), guess )
   end
 
 
@@ -187,6 +200,7 @@ Here's this module being exercised from an iex session:
   """
   @spec word_length(state) :: integer
   def word_length(%{ word: word }) do
+    String.length(word)
   end
 
   @doc """
@@ -199,6 +213,7 @@ Here's this module being exercised from an iex session:
 
   @spec letters_used_so_far(state) :: [ binary ]
   def letters_used_so_far(state) do
+    state.letters_guessed
   end
 
   @doc """
@@ -231,5 +246,9 @@ Here's this module being exercised from an iex session:
   ###########################
 
   # Your private functions go here
-
+  defp handle_answer(state, true, guess) do
+  end
+  defp handle_answer(state,true, guess) do
+    {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), letters_remain: List.delete(state.letters_remain,guess), turns: state.turns-1}, :good_guess}
+  end
  end
