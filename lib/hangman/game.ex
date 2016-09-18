@@ -255,4 +255,11 @@ Here's this module being exercised from an iex session:
       {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), letters_remain: letters_remain, turns: state.turns-1}, :good_guess}
     end
   end
+  defp handle_answer(state,false, guess) do
+    if(state.turns == 1) do
+      {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess)}, :lost, nil}
+    else
+      {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), turns: state.turns-1}, :bad_guess}
+    end
+  end
  end
