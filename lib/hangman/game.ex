@@ -153,7 +153,7 @@ Here's this module being exercised from an iex session:
     word = Hangman.Dictionary.random_word()
            |> String.trim
            |> String.downcase
-    state=%State{word: word, letters_remain: Enum.to_list(String.codepoints(word) )}
+    %State{word: word, letters_remain: Enum.to_list(String.codepoints(word) )}
   end
 
 
@@ -168,7 +168,7 @@ Here's this module being exercised from an iex session:
     |> String.trim
     |> String.downcase
 
-    state= %State{word: word, letters_remain: Enum.to_list(String.codepoints(word) )}
+    %State{word: word, letters_remain: Enum.to_list(String.codepoints(word) )}
   end
 
 
@@ -254,39 +254,36 @@ Here's this module being exercised from an iex session:
 
   # Your private functions go here
   defp handle_answer(state,true, guess) do
-    letters_remain = List.delete(state.letters_remain,guess)
+    letters_remain = List.to_string(state.letters_remain) |> String.replace(guess,"")|> String.codepoints()
     if(letters_remain == []) do
-      {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), letters_remain: letters_remain}, :won, nil}
+      {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: letters_remain}, :won, nil}
     else
-      {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), letters_remain: letters_remain, turns: state.turns-1}, :good_guess}
+      {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: letters_remain}, :good_guess, guess}
     end
   end
   defp handle_answer(state,false, guess) do
-    if(state.turns == 1) do
-      {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess)}, :lost, nil}
+    turns = state.turns - 1
+    if(turns == 0) do
+      {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: turns}, :lost, nil}
     else
-      {%State{state| letters_guessed: List.insert_at(state.letters_guessed,-1,guess), turns: state.turns-1}, :bad_guess}
+      {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: turns}, :bad_guess, guess}
     end
   end
 
 
   defp guessed_word_so_far(state, true) do
     String.replace(state.word,~r{(.)},"\\g{1} ")
+    |> String.trim
   end
   defp guessed_word_so_far(state, false) do
-    if(state.letters_guessed == []) do
-      String.replace(state.word,~r{(.)},"_ ")
+    if(state.letters_remain != []) do
+      String.replace(state.word,state.letters_remain,"_")
+      |>String.replace(~r{(.)},"\\g{1} ")
+      |>String.trim
     else
-      remain = List.to_string(state.letters_remain)
-      remainingword(state, String.equivalent?(state.word, remain) )
+      String.replace(state.word,~r{(.)},"\\g{1} ")
+      |> String.trim
     end
   end
 
-  defp remainingword(state, true) do
-    String.replace(state.word,~r{(.)},"_ ")
-  end
-  defp reminaingword(state, false) do
-    String.replace(state.word,state.letters_remain,"_")
-    |>String.replace(~r{(.)},"\\g{1} ")
-  end
  end

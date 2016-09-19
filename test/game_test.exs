@@ -133,7 +133,7 @@ defmodule GameTest do
 
   describe "a losing game" do
 
-    test "progresses through the states" do
+    test "progresses through the states " do
       game = Game.new_game("wibble")
 
       Enum.reduce(@losing_states, game, fn ({ guess, was, stat, left, used }, game) ->
@@ -149,5 +149,5 @@ defmodule GameTest do
 
   end
 
-  
+
 end
