@@ -254,19 +254,18 @@ Here's this module being exercised from an iex session:
 
   # Your private functions go here
   defp handle_answer(state,true, guess) do
-    letters_remain = List.to_string(state.letters_remain) |> String.replace(guess,"")|> String.codepoints()
-    if(letters_remain == []) do
-      {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: letters_remain}, :won, nil}
-    else
-      {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: letters_remain}, :good_guess, guess}
+      letters_remain = List.to_string(state.letters_remain) |> String.replace(guess,"")|> String.codepoints()
+      if(letters_remain == []) do
+        {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: letters_remain}, :won, nil}
+      else
+        {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: letters_remain}, :good_guess, guess}
+      end
     end
-  end
   defp handle_answer(state,false, guess) do
-    turns = state.turns - 1
-    if(turns == 0) do
-      {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: turns}, :lost, nil}
+    if(state.turns == 1) do
+      {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: state.turns - 1 }, :lost, nil}
     else
-      {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: turns}, :bad_guess, guess}
+      {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: state.turns - 1}, :bad_guess, guess}
     end
   end
 
