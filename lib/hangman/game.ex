@@ -245,7 +245,7 @@ Here's this module being exercised from an iex session:
 
   @spec word_as_string(state, boolean) :: binary
   def word_as_string(state, reveal \\ false) do
-    guessed_word_so_far(state, reveal)
+    guessed_word_so_far(state, reveal, state.letters_remain)
   end
 
   ###########################
@@ -255,34 +255,40 @@ Here's this module being exercised from an iex session:
   # Your private functions go here
   defp handle_answer(state,true, guess) do
       letters_remain = List.to_string(state.letters_remain) |> String.replace(guess,"")|> String.codepoints()
-      if(letters_remain == []) do
-        {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: letters_remain}, :won, nil}
-      else
-        {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: letters_remain}, :good_guess, guess}
-      end
+      return_success_state(state, letters_remain, guess)
     end
   defp handle_answer(state,false, guess) do
-    if(state.turns == 1) do
-      {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: state.turns - 1 }, :lost, nil}
-    else
-      {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: state.turns - 1}, :bad_guess, guess}
-    end
+    return_failure_state(state, state.turns, guess)
   end
 
 
-  defp guessed_word_so_far(state, true) do
+  defp guessed_word_so_far(state, true, _) do
     String.replace(state.word,~r{(.)},"\\g{1} ")
     |> String.trim
   end
-  defp guessed_word_so_far(state, false) do
-    if(state.letters_remain != []) do
-      String.replace(state.word,state.letters_remain,"_")
-      |>String.replace(~r{(.)},"\\g{1} ")
-      |>String.trim
-    else
-      String.replace(state.word,~r{(.)},"\\g{1} ")
-      |> String.trim
-    end
+  defp guessed_word_so_far(state, false, []) do
+    String.replace(state.word,~r{(.)},"\\g{1} ")
+    |> String.trim
+  end
+  defp guessed_word_so_far(state, false, list) do
+    String.replace(state.word,list,"_")
+    |>String.replace(~r{(.)},"\\g{1} ")
+    |>String.trim
+  end
+
+
+  defp return_success_state(state, [], guess) do
+    {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: []}, :won, nil}
+  end
+  defp return_success_state(state, list, guess) do
+    {%State{state| letters_guessed: state.letters_guessed ++ [guess], letters_remain: list}, :good_guess, guess}
+  end
+
+  defp return_failure_state(state, 1, guess) do
+    {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: state.turns - 1 }, :lost, nil}
+  end
+  defp return_failure_state(state, turns, guess) do
+    {%State{state| letters_guessed: state.letters_guessed ++ [guess], turns: turns - 1}, :bad_guess, guess}
   end
 
  end
